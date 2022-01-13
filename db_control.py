@@ -1,14 +1,20 @@
 import sqlite3
-from sqlite3 import Error
+from sqlite3 import Error, Row
 
 
 class ConnectionDB:
     @classmethod
     def show_todos(cls, conn):
+        all_todos = []
         cur = conn.cursor()
-        cur.execute("SELECT *FROM todos")
-        todos = cur.fetchall()
-        return todos
+        conn.row_factory = sqlite3.Row
+        sql = "SELECT *FROM todos"
+        cur.execute(sql)
+        rows = cur.fetchall()
+        for row in rows:
+            all_todos.append(dict(row))
+        return all_todos
+
 
     @classmethod
     def create_conn(cls, db_file):
@@ -29,6 +35,14 @@ class ConnectionDB:
         cur.execute(sql, todo)
         conn.commit()
 
+    @classmethod
+    def fetch_rows(cls, conn):
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute('select * from todos')
+        rows = cur.fetchone()
+        return rows.keys()
+
 
 
     @classmethod
@@ -39,6 +53,7 @@ class ConnectionDB:
     def delete_todo(cls):
         pass
 
+    # just do select on a certain id of a td?
     @classmethod
     def show_single_todo(cls):
         pass
@@ -56,7 +71,7 @@ def main():
     database = r'C:\Users\aisha\PycharmProjects\Mnworkie\mnatabase.db'
 
     conn = ConnectionDB.create_conn(database)
-    todo1 = ("make a dinner", "fry some zucchinis", 1, 1)
+    todo1 = ("get rid of heartburn", "take some pills or whatever :(", 1, 0)
     with conn:
         ConnectionDB.create_todo(conn, todo1)
 

@@ -23,10 +23,13 @@ class JsonSerDe(SerDe):
             return json.dump(todo, file, indent=4)
 
 conn = ConnectionDB.create_conn('mnatabase.db')
+rows_names = ConnectionDB.fetch_rows(conn)
+data_entries = ConnectionDB.show_todos(conn)
 
 @hug.get('/todo')
 def todo():
-   return ConnectionDB.show_todos(conn)
+   # full_data = list(zip(rows_names, *data_entries))
+   return data_entries
 
 @hug.get('/todo/user/{user_id}')
 def todo_user(user_id: int):
