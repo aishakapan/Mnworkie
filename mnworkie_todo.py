@@ -3,12 +3,22 @@ import json
 import uuid
 from db_control import ConnectionDB
 
-
+conn = ConnectionDB.create_conn('updated_mnatabase.db')
 class SerDe:
     @classmethod
-    def load(self):pass
+    def load(cls):pass
     @classmethod
-    def save(self, todo):pass
+    def save(cls, todo):pass
+
+class DBSerDe(SerDe):
+    @classmethod
+    def load(cls):
+        return ConnectionDB.show_todos(conn)
+
+    @classmethod
+    def save(cls, todo):
+        return ConnectionDB.upsert_todo(conn, todo_parameters=todo)
+
 
 
 class JsonSerDe(SerDe):
@@ -22,20 +32,55 @@ class JsonSerDe(SerDe):
         with open('mnworkie_json', 'w') as file:
             return json.dump(todo, file, indent=4)
 
-conn = ConnectionDB.create_conn('mnatabase.db')
-rows_names = ConnectionDB.fetch_rows(conn)
-data_entries = ConnectionDB.show_todos(conn)
 
-@hug.get('/todo')
-def todo():
-   # full_data = list(zip(rows_names, *data_entries))
-   return data_entries
 
-@hug.get('/todo/user/{user_id}')
+@hug.get('/todos')
+def todo(user_id: int):
+   all_todos = ConnectionDB.show_todos(conn, user_id)
+   return all_todos
+
+
+@hug.get('/todos/{todo_id}')
+def view_single_td(todo_id: int):
+    return ConnectionDB.show_single_todo(conn, todo_id)
+
+
+
+@hug.put('/todos')
+def todo_update(name, description, done: int, id, user_id):
+    todo_parameters = (name, description, done, id, user_id)
+    DBSerDe.save(todo_parameters)
+    return hug.redirect.see_other('/todos')
+
+@hug.post('/todos')
+def new_todo_post(name, description=None, done: bool=False):
+    new_todo(name, description, done)
+    return hug.redirect.see_other('/todos')
+
+@hug.delete('/todos/{todo_id}')
+def todo_delete(index: str):
+    load_todo = JsonSerDe.load()
+    del load_todo[index]
+    JsonSerDe.save(load_todo)
+    return load_todo
+
+
+@hug.cli()
+def new_todo_cli(name, description, done: bool=False):
+    new_todo(name, description, done)
+    return
+
+# @hug.get('/user/{user_id}/todos')
 def todo_user(user_id: int):
     input_dict = loading_short_dict()
     output_dict = {k:v for k,v in input_dict.items() if v['user_id'] == user_id}
     return output_dict
+
+# @hug.get('/todos/{index}')
+def view_single_td_json(index: str):
+    load_todo = JsonSerDe.load()
+    return load_todo[f"{index}"]
+
 
 def loading_short_dict():
     todo_dict = JsonSerDe.load()
@@ -59,14 +104,10 @@ def new_todo(name, description, done: bool=False):
     JsonSerDe.save(load_todo)
 
 
-# viewing a single to-do with description at a certain endpoint
-@hug.get('/todo/{index}')
-def view_single_td(index: str):
-    load_todo = JsonSerDe.load()
-    return load_todo[f"{index}"]
+
 
 # updating an EXISTING to-do
-@hug.put('/todo')
+# @hug.put('/todos')
 def todo_update(index: str, name, description, done: bool):
     load_todo = JsonSerDe.load()
     new_dict = {'user_id': 1,
@@ -77,25 +118,4 @@ def todo_update(index: str, name, description, done: bool):
     JsonSerDe.save(load_todo)
     return load_todo
 
-
-
-# posting a NEW to-do
-@hug.post('/todo')
-def new_todo_post(name, description, done: bool=False):
-    new_todo(name, description, done)
-    return hug.redirect.see_other('/todo')
-
-# deleting to-do at a specified index
-@hug.delete('/todo/{index}')
-def todo_delete(index: str):
-    load_todo = JsonSerDe.load()
-    del load_todo[index]
-    JsonSerDe.save(load_todo)
-    return load_todo
-
-# using hug from command line interface
-@hug.cli()
-def new_todo_cli(name, description, done: bool=False):
-    new_todo(name, description, done)
-    return
 
