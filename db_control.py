@@ -3,8 +3,7 @@ from sqlite3 import Error, Row
 
 
 class ConnectionDB:
-    def __init__(self, conn):
-        self.conn = conn
+
 
     @classmethod
     def create_conn(cls, db_file):
@@ -30,7 +29,7 @@ class ConnectionDB:
         all_todos = []
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        sql = """SELECT id, name, description, done FROM todos
+        sql = """SELECT name, description, done FROM todos
                     WHERE user_id=?"""
         cur.execute(sql, (user_id,))
         rows = cur.fetchall()
@@ -41,14 +40,14 @@ class ConnectionDB:
 
     @classmethod
     def create_todo(cls, conn, todo):
-        sql = """INSERT INTO todos (name, description, done, user_id)
+        sql = """INSERT INTO todos (name, user_id, description, done)
          VALUES(?,?,?,?)"""
         cur = conn.cursor()
         cur.execute(sql, todo)
         conn.commit()
 
     @classmethod
-    def delete_todo(cls,conn, id):
+    def delete_todo(cls, conn, id):
         sql = "DELETE FROM todos WHERE id=?"
         cur = conn.cursor()
         cur.execute(sql, (id,))

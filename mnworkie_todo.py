@@ -3,21 +3,37 @@ import json
 import uuid
 from db_control import ConnectionDB
 
-conn = ConnectionDB.create_conn('updated_mnatabase.db')
+
 class SerDe:
     @classmethod
-    def load(cls):pass
+    def load(cls, user_id):pass
     @classmethod
     def save(cls, todo):pass
 
+
+
 class DBSerDe(SerDe):
+    conn = ConnectionDB.create_conn('updated_mnatabase.db')
+
     @classmethod
-    def load(cls):
-        return ConnectionDB.show_todos(conn)
+    def load(cls, user_id):
+        return ConnectionDB.show_todos(cls.conn, user_id)
 
     @classmethod
     def save(cls, todo):
-        return ConnectionDB.upsert_todo(conn, todo_parameters=todo)
+        return ConnectionDB.upsert_todo(cls.conn, todo_parameters=todo)
+
+    @classmethod
+    def show_single(cls):
+        return ConnectionDB.show_single_todo(cls.conn, id)
+
+    @classmethod
+    def post(cls, todo):
+        return ConnectionDB.create_todo(cls.conn, todo)
+
+    @classmethod
+    def delete(cls):
+        return ConnectionDB.delete_todo(cls.conn, id)
 
 
 
@@ -33,17 +49,16 @@ class JsonSerDe(SerDe):
             return json.dump(todo, file, indent=4)
 
 
-
 @hug.get('/todos')
 def todo(user_id: int):
-   all_todos = ConnectionDB.show_todos(conn, user_id)
-   return all_todos
+    todos = []
+    todos.append(DBSerDe.load(user_id))
+    return todos
 
 
 @hug.get('/todos/{todo_id}')
 def view_single_td(todo_id: int):
-    return ConnectionDB.show_single_todo(conn, todo_id)
-
+    return DBSerDe.show_single(todo_id)
 
 
 @hug.put('/todos')
@@ -53,16 +68,17 @@ def todo_update(name, description, done: int, id, user_id):
     return hug.redirect.see_other('/todos')
 
 @hug.post('/todos')
-def new_todo_post(name, description=None, done: bool=False):
-    new_todo(name, description, done)
-    return hug.redirect.see_other('/todos')
+def new_todo_post(name, user_id, description=None, done: bool=False):
+    new_todo = (name,user_id, description, done)
+    DBSerDe.post(new_todo)
+    return True
+    # return hug.redirect.see_other(f'/todos?user_id={user_id}')
 
 @hug.delete('/todos/{todo_id}')
-def todo_delete(index: str):
-    load_todo = JsonSerDe.load()
-    del load_todo[index]
-    JsonSerDe.save(load_todo)
-    return load_todo
+def todo_delete(todo_id: str):
+    DBSerDe.delete(todo_id)
+    return hug.redirect.see_other('/todos')
+
 
 
 @hug.cli()
@@ -119,3 +135,14 @@ def todo_update(index: str, name, description, done: bool):
     return load_todo
 
 
+# @hug.post('/todos')
+def new_todo_post(name, description=None, done: bool=False):
+    new_todo(name, description, done)
+    return hug.redirect.see_other('/todos')
+#
+# @hug.delete('/todos/{todo_id}')
+def todo_delete(index: str):
+    load_todo = JsonSerDe.load()
+    del load_todo[index]
+    JsonSerDe.save(load_todo)
+    return load_todo
