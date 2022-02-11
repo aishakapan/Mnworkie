@@ -9,10 +9,13 @@
 <div>
 {% for mainkey in todos %}
     <p> {{mainkey}} </p>
+{# commented out
 {% for key, value in todos[mainkey].items() %}
     <p> {{ key }}: {{ value }} </p>
     {% endfor %}
+    #}
     {% endfor %}
+
 </div>
 </body>
 </html>

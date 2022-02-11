@@ -29,7 +29,7 @@ class ConnectionDB:
         all_todos = []
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        sql = """SELECT name, description, done FROM todos
+        sql = """SELECT name, done FROM todos
                     WHERE user_id=?"""
         cur.execute(sql, (user_id,))
         rows = cur.fetchall()
@@ -40,7 +40,7 @@ class ConnectionDB:
 
     @classmethod
     def create_todo(cls, conn, todo):
-        sql = """INSERT INTO todos (name, user_id, description, done)
+        sql = """INSERT INTO todos (name, description, user_id, done)
          VALUES(?,?,?,?)"""
         cur = conn.cursor()
         cur.execute(sql, todo)
@@ -55,7 +55,7 @@ class ConnectionDB:
 
     @classmethod
     def upsert_todo(cls, conn, todo_parameters):
-        sql = """INSERT INTO todos (name, description, done, id, user_id) VALUES(?,?,?,?,?)
+        sql = """INSERT INTO todos (id, name, description, user_id, done) VALUES(?,?,?,?,?)
                     ON CONFLICT(id) DO UPDATE SET
                     name = excluded.name,
                     description = excluded.description,
@@ -77,7 +77,7 @@ class ConnectionDB:
 
 
 def main():
-    database = r'C:\Users\aisha\PycharmProjects\Mnworkie\updated_mnatabase.db'
+    database = r'/home/morkovka/PycharmProjects/Mnworkie/flaskie_app/updated_mnatabase.db'
     conn = ConnectionDB.create_conn(database)
     sql_create_todos = """CREATE TABLE IF NOT EXISTS todos (
                                                          id integer PRIMARY KEY,
@@ -88,16 +88,20 @@ def main():
                                                          FOREIGN KEY(user_id) REFERENCES users(id)
                                                          
                                                          );"""
+    sql_create_users = """CREATE TABLE IF NOT EXISTS users (
+                                                        id integer PRIMARY KEY,
+                                                        username text NOT NULL,
+                                                        password text NOT NULL
+                                                        );"""
+
 
     # ConnectionDB.create_table(conn, sql_create_todos)
-    todo1 = ("cook some korean chicken", "deep fry until done!", 0, 1)
-    todo2 = ("complete the javascript course", "go through the exercises", 0, 1)
+    todo1 = ("cook some korean chicken", "deep fry until done!", 1, 0)
+    todo2 = ("complete the javascript course", "go through the exercises", 1, 0)
     todo3 = ("some junk", "alala", 0, 1)
     todo4 = ("get rid of heartburn again please", "idfk know how", 0, 2)
     with conn:
-        ConnectionDB.delete_todo(conn, 1)
-
-
+        ConnectionDB.delete_todo(conn, 5)
 
 
 
