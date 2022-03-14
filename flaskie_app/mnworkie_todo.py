@@ -1,8 +1,11 @@
+import logging
+
 import hug
 import json
 import uuid
-from db_control import ConnectionDB
+from db.db_control import ConnectionDB
 
+logging.basicConfig(level=logging.DEBUG)
 
 class SerDe:
     @classmethod
@@ -49,10 +52,25 @@ class JsonSerDe(SerDe):
             return json.dump(todo, file, indent=4)
 
 
-@hug.get('/todos/{user_id}')
-def todo(user_id: int):
+def verify(username, password):
+    id = ConnectionDB.check_user(username, password)
+    # raise Exception((username, password, id))
+    if id == None:
+        return False
+    else:
+        return id
+
+
+@hug.get_post('/login', requires=hug.authentication.basic(verify))
+def login(user:hug.directives.user):
+     return user
+
+
+@hug.get('/todos', requires=hug.authentication.basic(verify))
+def todo(user:hug.directives.user):
     todos = []
-    todos.append(DBSerDe.load(user_id))
+    todos.append(DBSerDe.load(user_id=user[0]))
+    print(user)
     return todos
 
 
@@ -61,18 +79,20 @@ def view_single_td(todo_id: int):
     return DBSerDe.show_single(todo_id)
 
 
-@hug.put('/todos/{user_id}')
-def todo_update(name, description, done: int, id, user_id):
-    todo_parameters = (name, description, user_id, done, id)
+@hug.put('/todos', requires=hug.authentication.basic(verify))
+def todo_update(name, description, done: int, id, user:hug.directives.user):
+    todo_parameters = (name, description, user, done, id)
     DBSerDe.save(todo_parameters)
     return hug.redirect.see_other('/todos')
 
-@hug.post('/todos/{user_id}')
-def new_todo_post(name, user_id, description=None, done: bool=False):
-    new_todo = (name, description, user_id, done)
+
+@hug.post('/todos', requires=hug.authentication.basic(verify))
+def new_todo_post(name, user:hug.directives.user, description=None, done: bool=False):
+    new_todo = (name, description, user, done)
     DBSerDe.post(new_todo)
-    return True
-    # return hug.redirect.see_other(f'/todos?user_id={user_id}')
+    return hug.redirect.see_other('/todos')
+
+
 
 @hug.delete('/todos/{user_id}/{todo_id}')
 def todo_delete(todo_id: str):
@@ -85,6 +105,8 @@ def todo_delete(todo_id: str):
 def new_todo_cli(name, description, done: bool=False):
     new_todo(name, description, done)
     return
+
+
 
 # @hug.get('/user/{user_id}/todos')
 def todo_user(user_id: int):

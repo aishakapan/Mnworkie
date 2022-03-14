@@ -32,9 +32,9 @@ class ConnectionDB:
         sql = """SELECT name, done FROM todos
                     WHERE user_id=?"""
         cur.execute(sql, (user_id,))
+
         rows = cur.fetchall()
         for row in rows:
-            print(row)
             all_todos.append(dict(zip(row.keys(), row)))
         return all_todos
 
@@ -68,11 +68,29 @@ class ConnectionDB:
 
     @classmethod
     def show_single_todo(cls, conn, id):
-        sql = "SELECT name, description, done FROM todos WHERE id=?"
+        sql = "SELECT name, description, done FROM todos WHERE id=? "
         cur = conn.cursor()
         cur.execute(sql, (id,))
         row = cur.fetchone()
         return row
+
+    @classmethod
+    def check_user(cls, username, password):
+        database = r'/home/morkovka/PycharmProjects/Mnworkie/flaskie_app/updated_mnatabase.db'
+        conn = ConnectionDB.create_conn(database)
+        sql = "SELECT id FROM users WHERE username=? AND password=?"
+
+
+        cur = conn.cursor()
+        cur.execute(sql,
+                   (username, password)
+                    )
+        row = cur.fetchone()
+        return row
+
+
+
+
 
 
 
@@ -101,7 +119,7 @@ def main():
     todo3 = ("some junk", "alala", 0, 1)
     todo4 = ("get rid of heartburn again please", "idfk know how", 0, 2)
     with conn:
-        ConnectionDB.delete_todo(conn, 5)
+        print(ConnectionDB.check_user(conn, 5, 56))
 
 
 

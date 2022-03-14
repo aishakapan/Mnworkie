@@ -7,15 +7,21 @@
 <body>
 <h1>List of TODOs</h1>
 <div>
-{% for mainkey in todos %}
-    <p> {{mainkey}} </p>
-{# commented out
-{% for key, value in todos[mainkey].items() %}
-    <p> {{ key }}: {{ value }} </p>
+<table class = "table">
+    <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Done status</th>
+    </tr>
+    {% for todo in todos %}
+    <tr>
+        <td>{{ todo.name }}</td>
+        <td>{{ todo.description }}</td>
+        <td>{{ todo.done }}</td>
+    </tr>
     {% endfor %}
-    #}
-    {% endfor %}
-
+</table>
 </div>
+
 </body>
 </html>

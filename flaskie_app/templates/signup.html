@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<title>Login</title>
+
+<title>Signup</title>
 
 {% extends "flashing.html" %}
 
 {% block body %}
-<h1>Login</h1>
+<h1>Signup</h1>
 <h2>Enter your details below</h2>
-<form method="POST" action ="/login">
+<form method="POST" action ="/signup">
     <div>{{ form.username.label }}: {{ form.username() }}</div>
     <div>{{ form.password.label }}: {{ form.password() }} </div>
      <p>{{ form.submit() }}</p>
 </form>
+
 {% endblock %}
