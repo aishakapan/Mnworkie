@@ -9,14 +9,12 @@
 <div>
 <table class = "table">
     <tr>
-            <th>Name</th>
-            <th>Description</th>
-            <th>Done status</th>
+        <th>Name</th>
+        <th>Done status</th>
     </tr>
     {% for todo in todos %}
     <tr>
         <td>{{ todo.name }}</td>
-        <td>{{ todo.description }}</td>
         <td>{{ todo.done }}</td>
     </tr>
     {% endfor %}
