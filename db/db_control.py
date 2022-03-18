@@ -43,8 +43,15 @@ class ConnectionDB:
         sql = """INSERT INTO todos (name, description, user_id, done)
          VALUES(?,?,?,?)"""
         cur = conn.cursor()
+
         cur.execute(sql, todo)
-        conn.commit()
+        with conn:
+            conn.commit()
+        print(conn.total_changes)
+
+
+
+
 
     @classmethod
     def delete_todo(cls, conn, id):
@@ -119,7 +126,7 @@ def main():
     todo3 = ("some junk", "alala", 0, 1)
     todo4 = ("get rid of heartburn again please", "idfk know how", 0, 2)
     with conn:
-        print(ConnectionDB.check_user(conn, 5, 56))
+        print(ConnectionDB.create_todo(conn, todo2))
 
 
 
