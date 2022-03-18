@@ -68,8 +68,8 @@ def login(user:hug.directives.user):
 
 @hug.get('/todos', requires=hug.authentication.basic(verify))
 def todo(user:hug.directives.user):
-    todos = []
-    todos.append(DBSerDe.load(user_id=user[0]))
+    todos = DBSerDe.load(user_id=user[0])
+
     print(user)
     return todos
 
@@ -88,7 +88,8 @@ def todo_update(name, description, done: int, id, user:hug.directives.user):
 
 @hug.post('/todos', requires=hug.authentication.basic(verify))
 def new_todo_post(name, user:hug.directives.user, description=None, done: bool=False):
-    new_todo = (name, description, user, done)
+    new_todo = (name, description, user[0], done)
+    print(new_todo)
     DBSerDe.post(new_todo)
     return hug.redirect.see_other('/todos')
 

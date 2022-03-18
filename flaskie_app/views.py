@@ -7,7 +7,7 @@ import flask
 import requests
 from flask import request, redirect, url_for, flash, session
 import json
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_required
 from .models import Users, Todos
 from . import db, app
 
@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG)
 def get_all_todos(username, encrypted_pword):
     url = f'http://localhost:8000/todos'
     view = requests.get(url, auth=(username, encrypted_pword))
-    return view.content
+    return view.json()
 
 
 def get_single_todo(user_id, todo_id):
@@ -29,6 +29,8 @@ def get_single_todo(user_id, todo_id):
 def todos():
     print(session)
     data = get_all_todos(*session['auth'])
+    print(data)
+
     html = flask.render_template('mnoverview.html', todos=data)
 
     return html
@@ -48,11 +50,15 @@ def new_td():
 
     if request.method == 'POST':
         new_td = NewTodo(request.form)
+        new_td.validate_on_submit()
         url = f'http://localhost:8000/todos'
         todo = {'name': new_td.name.data,
                 'description': new_td.description.data,
-                'done': new_td.done.data}
-        res = requests.post(url, data=todo, headers=session['auth'])
+                'done': new_td.done.data == 'y'}
+        print("This is form stuff:", request.form)
+
+        res = requests.post(url, data=todo, auth=session['auth'])
+        print(res.status_code)
         logging.info(res.text, stack_info=True)
         return redirect(url_for('todos'))
 
