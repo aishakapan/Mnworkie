@@ -27,9 +27,7 @@ def get_single_todo(user_id, todo_id):
 @login_required
 @app.route("/todos")
 def todos():
-    print(session)
     data = get_all_todos(*session['auth'])
-    print(data)
 
     html = flask.render_template('mnoverview.html', todos=data)
 
@@ -54,12 +52,16 @@ def new_td():
         url = f'http://localhost:8000/todos'
         todo = {'name': new_td.name.data,
                 'description': new_td.description.data,
-                'done': new_td.done.data == 'y'}
+                'done': True if new_td.done.data == 'y' else ''}
         print("This is form stuff:", request.form)
 
+        print(todo)
+        print('This is DONE STATUS: ', new_td.done.data)
+
         res = requests.post(url, data=todo, auth=session['auth'])
+        print(session)
         print(res.status_code)
-        logging.info(res.text, stack_info=True)
+        logging.info(res.content, stack_info=True)
         return redirect(url_for('todos'))
 
     if request.method == 'GET':

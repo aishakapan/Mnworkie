@@ -2,17 +2,13 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, validators, SelectField
 from wtforms.validators import DataRequired, Optional
 
-class MyBooleanField(BooleanField):
-    def __bool__(self):
-        return False
+
 
 class NewTodo(FlaskForm):
     name = StringField('Write a new todo here!', validators=[DataRequired()])
     description = StringField('Add a description.', validators=[Optional()])
-    done = SelectField('Done status', choices=[(True, 'true'), ('', '')], coerce=bool)
-    # done = BooleanField('Done status.', validators=[Optional()],
-    #                     default='',
-    #                     false_values=(False, "false", "", 0))
+    done = SelectField('Done status', choices=[('y', 'true'), ('', 'false')])
+    # done = BooleanField('Done status.', validators=[Optional()])
     submit = SubmitField('Submit')
 
 class Login(FlaskForm):
