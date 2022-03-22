@@ -14,7 +14,7 @@
     </tr>
     {% for todo in todos %}
     <tr>
-        <td>{{ todo.name }}</td>
+        <td><a href="{{ todo.link }}">{{ todo.name }}</a></td>
         <td>{{ todo.done }}</td>
     </tr>
     {% endfor %}

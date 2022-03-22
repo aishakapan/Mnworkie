@@ -74,7 +74,7 @@ def todo(user:hug.directives.user):
     return todos
 
 
-@hug.get('/todos/{user_id}/{todo_id}')
+@hug.get('/todos/{todo_id}', requires=hug.authentication.basic(verify))
 def view_single_td(todo_id: int):
     return DBSerDe.show_single(todo_id)
 
@@ -95,7 +95,7 @@ def new_todo_post(name, user:hug.directives.user, description=None, done: bool=F
 
 
 
-@hug.delete('/todos/{user_id}/{todo_id}')
+@hug.delete('/todos/{todo_id}')
 def todo_delete(todo_id: str):
     DBSerDe.delete(todo_id)
     return hug.redirect.see_other('/todos')

@@ -29,7 +29,7 @@ class ConnectionDB:
         all_todos = []
         conn.row_factory = sqlite3.Row
         cur = conn.cursor()
-        sql = """SELECT name, done FROM todos
+        sql = """SELECT id, name, done FROM todos
                     WHERE user_id=?"""
         cur.execute(sql, (user_id,))
 
