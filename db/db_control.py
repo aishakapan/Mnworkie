@@ -25,6 +25,17 @@ class ConnectionDB:
             print(e)
 
     @classmethod
+    def add_user(cls, conn, user):
+        sql = """INSERT INTO users (username, password)
+             VALUES(?,?)"""
+        cur = conn.cursor()
+
+        cur.execute(sql, user)
+        with conn:
+            conn.commit()
+
+
+    @classmethod
     def show_todos(cls, conn, user_id):
         all_todos = []
         conn.row_factory = sqlite3.Row
@@ -47,7 +58,7 @@ class ConnectionDB:
         cur.execute(sql, todo)
         with conn:
             conn.commit()
-        print(conn.total_changes)
+
 
 
 
@@ -125,8 +136,9 @@ def main():
     todo2 = ("complete the javascript course", "go through the exercises", 1, 0)
     todo3 = ("some junk", "alala", 0, 1)
     todo4 = ("get rid of heartburn again please", "idfk know how", 0, 2)
+    user1 = ('mniammy', 'iloveyou256')
     with conn:
-        print(ConnectionDB.create_todo(conn, todo2))
+        print(ConnectionDB.add_user(conn, user1))
 
 
 

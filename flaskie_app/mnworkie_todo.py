@@ -27,6 +27,10 @@ class DBSerDe(SerDe):
         return ConnectionDB.upsert_todo(cls.conn, todo_parameters=todo)
 
     @classmethod
+    def add_user(cls, user):
+        return ConnectionDB.add_user(cls.conn, user)
+
+    @classmethod
     def show_single(cls, todo_id):
         return ConnectionDB.show_single_todo(cls.conn, todo_id)
 
@@ -54,12 +58,21 @@ class JsonSerDe(SerDe):
 
 def verify(username, password):
     id = ConnectionDB.check_user(username, password)
-    # raise Exception((username, password, id))
     if id == None:
         return False
     else:
         return id
 
+# maybe just post
+@hug.get_post('/signup')
+def signup(username, password):
+    user = (username, password)
+    # i.e. if a user does not exist (cannot find his id) then register
+    if not verify(*user):
+        DBSerDe.add_user(user)
+        return hug.redirect.see_other('/login')
+    else:
+        return 'User already exists!'
 
 @hug.get_post('/login', requires=hug.authentication.basic(verify))
 def login(user:hug.directives.user):
@@ -70,7 +83,6 @@ def login(user:hug.directives.user):
 def todo(user:hug.directives.user):
     todos = DBSerDe.load(user_id=user[0])
 
-    print(user)
     return todos
 
 
@@ -89,7 +101,6 @@ def todo_update(name, description, done: int, id, user:hug.directives.user):
 @hug.post('/todos', requires=hug.authentication.basic(verify))
 def new_todo_post(name, user:hug.directives.user, description=None, done: bool=False):
     new_todo = (name, description, user[0], done)
-    print(new_todo)
     DBSerDe.post(new_todo)
     return hug.redirect.see_other('/todos')
 

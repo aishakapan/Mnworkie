@@ -100,19 +100,24 @@ def signup():
 
 @app.route("/signup", methods=['POST'])
 def signup_post():
-
+    print('SESS: ', session)
     username = request.form.get('username')
     password = request.form.get('password')
-
-    form = Signup(username=username, password=password)
-
+    encrypted_pword = hashing_256(password)
 
 
+    url = f'http://localhost:8000/signup'
+    data = {'username': username,
+            'password': encrypted_pword}
+    response = requests.post(url, data=data, auth=(username, encrypted_pword))
+    response.raise_for_status()
 
 
-    return redirect(url_for("login"))
-
-
+    if response.text == 'User already exists!':
+        return response.text
+    else:
+        flask.flash('Signed up successfully.')
+        return redirect(url_for("login"))
 
 
 
@@ -121,6 +126,7 @@ def login():
 
     form = Login()
     return flask.render_template('login.html', form=form)
+
 
 
 @app.route("/login", methods=['GET', 'POST'])
