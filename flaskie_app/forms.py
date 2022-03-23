@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, BooleanField, validators, SelectField
+from wtforms import StringField, SubmitField, PasswordField, validators, SelectField
 from wtforms.validators import DataRequired, Optional
 
 
@@ -13,11 +13,11 @@ class NewTodo(FlaskForm):
 
 class Login(FlaskForm):
     username = StringField('Username', [validators.Length(min=4, max=25)])
-    password = StringField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Login')
 
 class Signup(FlaskForm):
     username = StringField('Username', [validators.Length(min=4, max=25,
                                                           message=('Username should contain at least 4 characters.'))])
-    password = StringField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Signup')
