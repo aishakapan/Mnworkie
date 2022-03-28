@@ -14,11 +14,20 @@
     </tr>
     {% for todo in todos %}
     <tr>
+
+        {% if todo.done %}
         <td><a href="{{ todo.link }}">{{ todo.name }}</a></td>
-        <td>{{ todo.done }}</td>
+        <td>&#9989;</td>
+        {% else %}
+        <td><del><a href="{{ todo.link }}">{{ todo.name }}</a></del></td>
+        <td>&#10060;</td>
+        {% endif %}
+
     </tr>
     {% endfor %}
 </table>
+
+
 </div>
 
 </body>

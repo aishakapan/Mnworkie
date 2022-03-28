@@ -46,6 +46,8 @@ def get_single_todo(todo_id):
 
     return view.json()
 
+@app.route('/mnworkie')
+
 @app.route("/todos")
 def todos():
 
@@ -64,24 +66,36 @@ def todos():
 def single_td(todo_id):
 
     data = get_single_todo(todo_id)
-    html = flask.render_template('single_view.html', todos=data)
+    html = flask.render_template('single_view.html', todos=data, todo_id=todo_id)
 
     return html
 
+@app.route("/todos/<todo_id>", methods=['PATCH'])
+def patch_td(todo_id):
+    print(request.form)
+    data = {'done': request.form.get('done', 0)}
+    print(data)
+    url = f'http://localhost:8000/todos/{todo_id}'
+    res = requests.patch(url, data)
+    print(res.text)
+
+
+
+    return f"{res.text}"
 
 @app.route("/newtd", methods=['GET', 'POST'])
 def new_td():
 
     if request.method == 'POST':
         new_td = NewTodo(request.form)
-        new_td.validate_on_submit()
         url = f'http://localhost:8000/todos'
         todo = {'name': new_td.name.data,
                 'description': new_td.description.data,
                 'done': True if new_td.done.data == 'y' else ''}
+        new_td.validate_on_submit()
 
         res = requests.post(url, data=todo, auth=session['auth'])
-        logging.info(res.content, stack_info=True)
+        # logging.info(res.content, stack_info=True)
         return redirect(url_for('todos'))
 
     if request.method == 'GET':

@@ -42,6 +42,10 @@ class DBSerDe(SerDe):
     def delete(cls):
         return ConnectionDB.delete_todo(cls.conn, id)
 
+    @classmethod
+    def patch(cls, todo):
+        return ConnectionDB.patch_todo(cls.conn, todo_parameters=todo)
+
 
 
 class JsonSerDe(SerDe):
@@ -106,11 +110,20 @@ def new_todo_post(name, user:hug.directives.user, description=None, done: bool=F
 
 
 
-@hug.delete('/todos/{todo_id}')
+@hug.delete('/todos/{todo_id}',  requires=hug.authentication.basic(verify))
 def todo_delete(todo_id: str):
     DBSerDe.delete(todo_id)
     return hug.redirect.see_other('/todos')
 
+
+@hug.patch('/todos/{todo_id}'
+           #requires=hug.authentication.basic(verify)
+           )
+def todo_patch(done: int, todo_id):
+    todo_parameters = (done, todo_id)
+    DBSerDe.patch(todo_parameters)
+    print(todo_parameters)
+    return
 
 
 @hug.cli()

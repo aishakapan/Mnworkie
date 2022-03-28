@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="https://unpkg.com/htmx.org@1.7.0"></script>
 <head>
     <meta charset="UTF-8">
     <title>Single Todo</title>
@@ -16,8 +17,12 @@
     <tr>
         <td>{{ todos[0] }}</td>
         <td>{{ todos[1] }}</td>
-        <td>{{ todos[2] }}</td>
+        <td><input type="checkbox" id="" name="done" value="1" hx-patch="/todos/{{ todo_id }}"></td>
+
     </tr>
 
+
+
+</table>
 </body>
 </html>

@@ -61,15 +61,13 @@ class ConnectionDB:
 
 
 
-
-
-
     @classmethod
     def delete_todo(cls, conn, id):
         sql = "DELETE FROM todos WHERE id=?"
         cur = conn.cursor()
         cur.execute(sql, (id,))
         conn.commit()
+
 
     @classmethod
     def upsert_todo(cls, conn, todo_parameters):
@@ -82,6 +80,18 @@ class ConnectionDB:
         cur = conn.cursor()
         cur.execute(sql, todo_parameters)
         conn.commit()
+
+
+    @classmethod
+    def patch_todo(cls, conn, todo_parameters):
+        sql = """UPDATE todos
+                 SET done=?
+                 WHERE id=?
+                  """
+        cur = conn.cursor()
+        cur.execute(sql, todo_parameters)
+        conn.commit()
+
 
 
     @classmethod
@@ -138,7 +148,7 @@ def main():
     todo4 = ("get rid of heartburn again please", "idfk know how", 0, 2)
     user1 = ('mniammy', 'iloveyou256')
     with conn:
-        print(ConnectionDB.add_user(conn, user1))
+        print(ConnectionDB.patch_todo(conn, (0, 42)))
 
 
 
