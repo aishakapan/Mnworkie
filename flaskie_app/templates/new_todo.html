@@ -2,24 +2,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>NEW TODO</title>
 </head>
 <body>
 <form action="http://127.0.0.1:5000/newtd?user_id=1" method="post">
-<p>
+ <div class="form-group">
     {{ form.name.label }}<br>
     {{ form.name(size=32) }}
-</p>
- <p>
+ </div>
+<div class="form-group">
     {{ form.description.label }}<br>
     {{ form.description(size=32) }}
-</p>
- <p>
+</div>
+<div class="form-group form-check">
     {{ form.done.label }}<br>
     {{ form.done }}
-</p>
-    <p>{{ form.submit() }}</p>
-</form>>
+</div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 </body>
 </html>

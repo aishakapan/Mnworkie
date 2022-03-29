@@ -1,34 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="https://unpkg.com/htmx.org@1.7.0"></script>
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>Mnworkie!</title>
 </head>
+
+
 <body>
+{% include "flashing.html" %}
 <h1>List of TODOs</h1>
 <div>
-<table class = "table">
+<table class = "table table-hover">
     <tr>
+        <th></th>
         <th>Name</th>
         <th>Done status</th>
+        <th>Action</th>
+        <th></th>
     </tr>
     {% for todo in todos %}
-    <tr>
-
+    <tr id="todo{{ todo.id }}">
+        <td></td>
         {% if todo.done %}
-        <td><a href="{{ todo.link }}">{{ todo.name }}</a></td>
+        <td><del><a href="{{ todo.link }}">{{ todo.name }}</a></del></td>
         <td>&#9989;</td>
         {% else %}
-        <td><del><a href="{{ todo.link }}">{{ todo.name }}</a></del></td>
+        <td><a href="{{ todo.link }}">{{ todo.name }}</a></td>
         <td>&#10060;</td>
         {% endif %}
-
+        <td><a href="http://127.0.0.1:5000/todos" role="button" aria-pressed="false" hx-delete="{{ todo.link }}" hx-trigger="click" hx-target="#todo{{ todo.id }}">Delete</a></td>
+        <td></td>
     </tr>
     {% endfor %}
 </table>
-
-
 </div>
+
+<a href="http://127.0.0.1:5000/newtd" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">New todo</a>
+<a href="http://127.0.0.1:5000/logout" class="btn btn-secondary btn-lg" role="button" aria-pressed="true">Logout</a>
+
+
 
 </body>
 </html>

@@ -39,8 +39,8 @@ class DBSerDe(SerDe):
         return ConnectionDB.create_todo(cls.conn, todo)
 
     @classmethod
-    def delete(cls):
-        return ConnectionDB.delete_todo(cls.conn, id)
+    def delete(cls, todo_id):
+        return ConnectionDB.delete_todo(cls.conn, todo_id)
 
     @classmethod
     def patch(cls, todo):

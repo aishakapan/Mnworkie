@@ -70,18 +70,26 @@ def single_td(todo_id):
 
     return html
 
+
 @app.route("/todos/<todo_id>", methods=['PATCH'])
 def patch_td(todo_id):
-    print(request.form)
+
     data = {'done': request.form.get('done', 0)}
-    print(data)
     url = f'http://localhost:8000/todos/{todo_id}'
     res = requests.patch(url, data)
-    print(res.text)
-
-
 
     return f"{res.text}"
+
+
+@app.route("/todos/<todo_id>", methods=['DELETE'])
+def delete_td(todo_id):
+
+    url = f'http://localhost:8000/todos/{todo_id}'
+    res = requests.delete(url, auth=session['auth'])
+    data = get_all_todos(*session['auth'])
+    print(res.text)
+    return ''
+
 
 @app.route("/newtd", methods=['GET', 'POST'])
 def new_td():
@@ -101,6 +109,7 @@ def new_td():
     if request.method == 'GET':
         new_td = NewTodo()
         return flask.render_template('new_todo.html', form=new_td, user_id=1)
+
 
 
 

@@ -2,6 +2,7 @@
 <html lang="en">
 <script src="https://unpkg.com/htmx.org@1.7.0"></script>
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <meta charset="UTF-8">
     <title>Single Todo</title>
 </head>
@@ -11,18 +12,16 @@
         <th>Name</th>
         <th>Description</th>
         <th>Done status</th>
-
     </tr>
 
     <tr>
         <td>{{ todos[0] }}</td>
         <td>{{ todos[1] }}</td>
         <td><input type="checkbox" id="" name="done" value="1" hx-patch="/todos/{{ todo_id }}"></td>
-
     </tr>
 
-
-
 </table>
+<a href="http://127.0.0.1:5000/todos" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Back to all todos</a>
+
 </body>
 </html>

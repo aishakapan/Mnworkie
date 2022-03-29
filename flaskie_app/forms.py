@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, PasswordField, validators, SelectField
+from wtforms import StringField, SubmitField, PasswordField, validators, SelectField, BooleanField
 from wtforms.validators import DataRequired, Optional
 
 
@@ -21,3 +21,5 @@ class Signup(FlaskForm):
                                                           message=('Username should contain at least 4 characters.'))])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Signup')
+
+
