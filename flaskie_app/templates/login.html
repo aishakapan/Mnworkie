@@ -9,11 +9,13 @@
 
 <body>
 {% include "flashing.html" %}
+<div align="center">
 <h1>Login</h1>
-<h2>Enter your details below</h2>
-<form method="POST" action ="/login">
+<h3>Enter your details below</h3>
+</div>
+<div align="center"><form method="POST" action ="/login">
     <div class="form-group"> {{ form.username.label }}: {{ form.username() }}</div>
     <div class="form-group"> {{ form.password.label }}: {{ form.password() }} </div>
     <button type="submit" class="btn btn-primary">Submit</button>
-</form>
+</form></div>
 </body>

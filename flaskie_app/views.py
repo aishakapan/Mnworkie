@@ -47,6 +47,8 @@ def get_single_todo(todo_id):
     return view.json()
 
 @app.route('/mnworkie')
+def mnworkie():
+    return flask.render_template('landing_page.html')
 
 @app.route("/todos")
 def todos():
@@ -85,8 +87,8 @@ def patch_td(todo_id):
 def delete_td(todo_id):
 
     url = f'http://localhost:8000/todos/{todo_id}'
-    res = requests.delete(url, auth=session['auth'])
-    data = get_all_todos(*session['auth'])
+    res = requests.delete(url, auth=session.get('auth'))
+    data = get_all_todos(*session.get('auth', ()))
     print(res.text)
     return ''
 
@@ -102,7 +104,7 @@ def new_td():
                 'done': True if new_td.done.data == 'y' else ''}
         new_td.validate_on_submit()
 
-        res = requests.post(url, data=todo, auth=session['auth'])
+        res = requests.post(url, data=todo, auth=session.get('auth'))
         # logging.info(res.content, stack_info=True)
         return redirect(url_for('todos'))
 
@@ -164,15 +166,19 @@ def login_post():
     response = requests.post(url, auth=(username, encrypted_pword))
 
 
-    response.raise_for_status()
-    flask.flash('Logged in successfully.')
-    session['auth'] = (username, encrypted_pword)
-
-    return redirect(url_for('todos'))
+    if response:
+        flask.flash('Logged in successfully.')
+        session['auth'] = (username, encrypted_pword)
+        return redirect(url_for('todos'))
+    elif not response:
+        flask.flash('Wrong credentials. Please try again.')
+        return redirect(url_for('login'))
+    else:
+        response.raise_for_status()
 
 
 
 @app.route('/logout')
 def logout():
     session.pop('auth', None)
-    return 'You have been logged out.'
+    return redirect(url_for('mnworkie'))
