@@ -30,7 +30,7 @@
         <td><a href="{{ todo.link }}">{{ todo.name }}</a></td>
         <td>&#10060;</td>
         {% endif %}
-        <td><a href="http://127.0.0.1:5000/todos" role="button"  class="btn btn-danger" aria-pressed="false" hx-delete="{{ todo.link }}" hx-trigger="click" hx-target="#todo{{ todo.id }}">Delete</a></td>
+        <td><a href="{{ url_for('.todos') }}" role="button"  class="btn btn-danger" aria-pressed="false" hx-delete="{{ todo.link }}" hx-trigger="click" hx-target="#todo{{ todo.id }}">Delete</a></td>
         <td></td>
     </tr>
     {% endfor %}

@@ -1,16 +1,24 @@
 import logging
+from functools import wraps
 import hashlib
 import base64
 from werkzeug.security import generate_password_hash, check_password_hash
-from flaskie_app.forms import NewTodo, Login, Signup
+from forms import NewTodo, Login, Signup
 import flask
 import requests
 from flask import request, redirect, url_for, flash, session
 import json
-from .models import Users, Todos
-from . import db, app
+from models import Users, Todos
+from app import create_app
+from create_db import create_db
+from db.db_control import ConnectionDB
 
 logging.basicConfig(level=logging.DEBUG)
+
+db = create_db()
+app = create_app()
+
+
 
 # this function is not really used anymore, since
 # requests library provides a separate authorization functionality
@@ -30,9 +38,19 @@ def hashing_256(password):
 
     return result.hexdigest()
 
+
+def login_required(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'auth' not in session:
+            return redirect(url_for('login', _method="GET"))
+        return func(*args, **kwargs)
+    return wrapper
+
+
 def get_all_todos(username, encrypted_pword):
 
-    url = f'http://localhost:8000/todos'
+    url = url_for('todos', _external=True)
     view = requests.get(url, auth=(username, encrypted_pword))
 
     return view.json()
@@ -40,20 +58,48 @@ def get_all_todos(username, encrypted_pword):
 
 def get_single_todo(todo_id):
 
-    url = f'http://localhost:8000/todos/{todo_id}'
+    url = f"{url_for('todos', _external=True)}/{todo_id}"
     view = requests.get(url, auth=session['auth'])
     view.raise_for_status()
 
     return view.json()
 
-@app.route('/mnworkie')
+def signup_db(username, password):
+    user = (username, password)
+    conn = ConnectionDB.create_conn('mnworkie.db')
+    ConnectionDB.add_user(conn, user)
+    return True
+
+def login_db(username, password):
+    conn = ConnectionDB.create_conn('mnworkie.db')
+    exists = ConnectionDB.check_user(conn, username, password)
+    return exists
+
+def new_td_db():
+    pass
+
+def patch_db():
+    pass
+
+def delete_db():
+    pass
+
+def get_todos_db():
+    pass
+
+def get_one_todo_db():
+    pass
+
+
+@app.route('/')
 def mnworkie():
     return flask.render_template('landing_page.html')
 
 @app.route("/todos")
+@login_required
 def todos():
 
-    data = get_all_todos(*session['auth'])
+    data = get_todos_db()
 
     for todo in data:
         link = url_for(single_td.__name__, todo_id=todo['id'])
@@ -65,46 +111,44 @@ def todos():
 
 
 @app.route("/todos/<todo_id>")
+@login_required
 def single_td(todo_id):
 
-    data = get_single_todo(todo_id)
+    data = get_one_todo_db(todo_id)
     html = flask.render_template('single_view.html', todos=data, todo_id=todo_id)
 
     return html
 
 
 @app.route("/todos/<todo_id>", methods=['PATCH'])
+@login_required
 def patch_td(todo_id):
-
-    data = {'done': request.form.get('done', 0)}
-    url = f'http://localhost:8000/todos/{todo_id}'
-    res = requests.patch(url, data)
-
-    return f"{res.text}"
+    patch_td(todo_id)
+    flash('Todo modified successfully.')
+    return redirect(url_for('todos'))
 
 
 @app.route("/todos/<todo_id>", methods=['DELETE'])
+@login_required
 def delete_td(todo_id):
-
-    url = f'http://localhost:8000/todos/{todo_id}'
-    res = requests.delete(url, auth=session.get('auth'))
-    data = get_all_todos(*session.get('auth', ()))
-    print(res.text)
-    return ''
+    delete_db(todo_id)
+    flash('Todo deleted successfully.')
+    return redirect(url_for('todos'))
 
 
 @app.route("/newtd", methods=['GET', 'POST'])
+@login_required
 def new_td():
 
     if request.method == 'POST':
         new_td = NewTodo(request.form)
-        url = f'http://localhost:8000/todos'
+        url = url_for('todos')
         todo = {'name': new_td.name.data,
                 'description': new_td.description.data,
                 'done': True if new_td.done.data == 'y' else ''}
         new_td.validate_on_submit()
 
-        res = requests.post(url, data=todo, auth=session.get('auth'))
+        new_td_db()
         # logging.info(res.content, stack_info=True)
         return redirect(url_for('todos'))
 
@@ -125,22 +169,26 @@ def signup():
 
 @app.route("/signup", methods=['POST'])
 def signup_post():
+
     print('SESS: ', session)
     username = request.form.get('username')
     password = request.form.get('password')
     encrypted_pword = hashing_256(password)
 
 
-    url = f'http://localhost:8000/signup'
-    data = {'username': username,
-            'password': encrypted_pword}
-    response = requests.post(url, data=data, auth=(username, encrypted_pword))
-    response.raise_for_status()
+    # url = url_for('signup', _external=True)
+    # data = {'username': username,
+    #         'password': encrypted_pword}
 
 
-    if response.text == 'User already exists!':
-        return response.text
-    else:
+    # response.raise_for_status()
+
+
+    # if response.text == 'User already exists!':
+    #     return response.text
+    # else:
+    response = signup_db(username, encrypted_pword)
+    if response:
         flask.flash('Signed up successfully.')
         return redirect(url_for("login"))
 
@@ -150,35 +198,37 @@ def signup_post():
 def login():
 
     form = Login()
+    flask.flash('You need to be logged in to view and edit todos.')
     return flask.render_template('login.html', form=form)
 
 
 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/login", methods=['POST'])
 def login_post():
 
     username = request.form.get('username')
     password = request.form.get('password')
+    # print(password)
+    # print(request.form)
+    # url = url_for('login', _external=True)
     encrypted_pword = hashing_256(password)
-
-
-    url = f'http://localhost:8000/login'
-    response = requests.post(url, auth=(username, encrypted_pword))
-
+    # print(encrypted_pword)
+    response = login_db(username, encrypted_pword)
 
     if response:
         flask.flash('Logged in successfully.')
         session['auth'] = (username, encrypted_pword)
-        return redirect(url_for('todos'))
+        return redirect(url_for('todos', _method='GET'))
+
     elif not response:
         flask.flash('Wrong credentials. Please try again.')
         return redirect(url_for('login'))
-    else:
-        response.raise_for_status()
+    # else:
+    #     response.raise_for_status()
 
 
 
 @app.route('/logout')
 def logout():
     session.pop('auth', None)
-    return redirect(url_for('mnworkie'))
+    return redirect(url_for('/'))

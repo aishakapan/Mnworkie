@@ -103,9 +103,7 @@ class ConnectionDB:
         return row
 
     @classmethod
-    def check_user(cls, username, password):
-        database = r'/home/morkovka/PycharmProjects/Mnworkie/flaskie_app/updated_mnatabase.db'
-        conn = ConnectionDB.create_conn(database)
+    def check_user(cls, conn, username, password):
         sql = "SELECT id FROM users WHERE username=? AND password=?"
 
 
@@ -123,7 +121,7 @@ class ConnectionDB:
 
 
 def main():
-    database = r'/home/morkovka/PycharmProjects/Mnworkie/flaskie_app/updated_mnatabase.db'
+    database = r'/home/morkovka/PycharmProjects/Mnworkie/flaskie_app/mnworkie.db'
     conn = ConnectionDB.create_conn(database)
     sql_create_todos = """CREATE TABLE IF NOT EXISTS todos (
                                                          id integer PRIMARY KEY,
@@ -141,14 +139,16 @@ def main():
                                                         );"""
 
 
-    # ConnectionDB.create_table(conn, sql_create_todos)
-    todo1 = ("cook some korean chicken", "deep fry until done!", 1, 0)
-    todo2 = ("complete the javascript course", "go through the exercises", 1, 0)
-    todo3 = ("some junk", "alala", 0, 1)
-    todo4 = ("get rid of heartburn again please", "idfk know how", 0, 2)
-    user1 = ('mniammy', 'iloveyou256')
-    with conn:
-        print(ConnectionDB.patch_todo(conn, (0, 42)))
+    ConnectionDB.create_table(conn, sql_create_todos)
+    ConnectionDB.create_table(conn, sql_create_users)
+
+    # todo1 = ("cook some korean chicken", "deep fry until done!", 1, 0)
+    # todo2 = ("complete the javascript course", "go through the exercises", 1, 0)
+    # todo3 = ("some junk", "alala", 0, 1)
+    # todo4 = ("get rid of heartburn again please", "idfk know how", 0, 2)
+    #  user1 = ('mniammy', 'iloveyou256')
+    # with conn:
+    #     print(ConnectionDB.patch_todo(conn, (0, 42)))
 
 
 
